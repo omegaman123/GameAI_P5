@@ -37,11 +37,19 @@ def make_checker(rule):
     # Implement a function that returns a function to determine whether a state meets a
     # rule's requirements. This code runs once, when the rules are constructed before
     # the search is attempted.
-
     def check(state):
         # This code is called by graph(state) and runs millions of times.
         # Tip: Do something with rule['Consumes'] and rule['Requires'].
-        return True
+        possible = True
+        if 'Consumes' in rule:
+            for material in rule['Consumes']:
+                if state[material] < rule['Consumes'][material]:
+                    possible = False
+        if 'Requires' in rule:
+            for req in rule['Requires']:
+                if state[req] < 0:
+                    possible = False
+            return possible
 
     return check
 
@@ -54,7 +62,12 @@ def make_effector(rule):
     def effect(state):
         # This code is called by graph(state) and runs millions of times
         # Tip: Do something with rule['Produces'] and rule['Consumes'].
-        next_state = None
+        next_state = state
+        if 'Consumes' in rule:
+            for material in rule['Consumes']:
+                next_state[material] -= rule['Consumes'][material]
+        for product in rule['Produces']:
+            next_state[product] += rule['Produces'][product]
         return next_state
 
     return effect
@@ -63,10 +76,14 @@ def make_effector(rule):
 def make_goal_checker(goal):
     # Implement a function that returns a function which checks if the state has
     # met the goal criteria. This code runs once, before the search is attempted.
-
     def is_goal(state):
         # This code is used in the search process and may be called millions of times.
-        return False
+        num_goals = len(goal)
+        reached = 0
+        for g in goal:
+            if state[g] > 1:
+                reached += 1
+        return reached == num_goals
 
     return is_goal
 
@@ -84,8 +101,8 @@ def heuristic(state):
     # Implement your heuristic here!
     return 0
 
-def search(graph, state, is_goal, limit, heuristic):
 
+def search(graph, state, is_goal, limit, heuristic):
     start_time = time()
 
     # Implement your search here! Use your heuristic here!
@@ -93,12 +110,16 @@ def search(graph, state, is_goal, limit, heuristic):
     # representing the path. Each element (tuple) of the list represents a state
     # in the path and the action that took you to this state
     while time() - start_time < limit:
+        l = graph(state)
+        for g in l:
+            print(f"from state {state} we can do {g}")
         pass
 
     # Failed to find a path
     print(time() - start_time, 'seconds.')
     print("Failed to find a path from", state, 'within time limit.')
     return None
+
 
 if __name__ == '__main__':
     with open('Crafting.json') as f:
@@ -137,5 +158,5 @@ if __name__ == '__main__':
     if resulting_plan:
         # Print resulting plan
         for state, action in resulting_plan:
-            print('\t',state)
+            print('\t', state)
             print(action)
