@@ -1,6 +1,7 @@
 import json
 from collections import namedtuple, defaultdict, OrderedDict
 from timeit import default_timer as time
+from heapq import heappush, heappop
 
 Recipe = namedtuple('Recipe', ['name', 'check', 'effect', 'cost'])
 
@@ -111,11 +112,26 @@ def search(graph, state, is_goal, limit, heuristic):
     # in the path and the action that took you to this state
 
     # while time() - start_time < limit:
+    h = []
+    heappush(h, (0, state))
+    came_from = dict()
+    cost_so_far = dict()
+    came_from[state] = None
+    cost_so_far[state] = 0.0
+
     while True:
-        print(f"state is {state}")
-        for possible_action, effect_state, cost in graph(state):
-            print(f"from state {state} we can do action {possible_action} with effect {effect_state} with cost {cost}")
-        pass
+        current = heappop(h)[1]
+        if is_goal(current):
+            break
+        print(f"state is {current}---------------------")
+        for possible_action, effect_state, cost in graph(current):
+            print(f"from state {current} we can do action {possible_action} with effect {effect_state} with cost {cost}")
+            new_cost = cost_so_far[current] + cost
+            if effect_state not in cost_so_far or new_cost < cost_so_far[effect_state]:
+                cost_so_far[effect_state] = new_cost
+                priority = new_cost
+                heappush(h, (priority, effect_state))
+                came_from[effect_state] = current
 
     # Failed to find a path
     print(time() - start_time, 'seconds.')
