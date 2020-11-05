@@ -47,9 +47,9 @@ def make_checker(rule):
                     possible = False
         if 'Requires' in rule:
             for req in rule['Requires']:
-                if state[req] < 0:
+                if state[req] < 1:
                     possible = False
-            return possible
+        return possible
 
     return check
 
@@ -62,7 +62,7 @@ def make_effector(rule):
     def effect(state):
         # This code is called by graph(state) and runs millions of times
         # Tip: Do something with rule['Produces'] and rule['Consumes'].
-        next_state = state
+        next_state = state.copy()
         if 'Consumes' in rule:
             for material in rule['Consumes']:
                 next_state[material] -= rule['Consumes'][material]
@@ -109,10 +109,12 @@ def search(graph, state, is_goal, limit, heuristic):
     # When you find a path to the goal return a list of tuples [(state, action)]
     # representing the path. Each element (tuple) of the list represents a state
     # in the path and the action that took you to this state
-    while time() - start_time < limit:
-        l = graph(state)
-        for g in l:
-            print(f"from state {state} we can do {g}")
+
+    # while time() - start_time < limit:
+    while True:
+        print(f"state is {state}")
+        for possible_action, effect_state, cost in graph(state):
+            print(f"from state {state} we can do action {possible_action} with effect {effect_state} with cost {cost}")
         pass
 
     # Failed to find a path
