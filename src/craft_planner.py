@@ -79,13 +79,21 @@ def make_goal_checker(goal):
     # met the goal criteria. This code runs once, before the search is attempted.
     def is_goal(state):
         # This code is used in the search process and may be called millions of times.
+        """
+        print(f"Goal: {goal}")
         num_goals = len(goal)
         reached = 0
         for g in goal:
             if state[g] > 1:
                 reached += 1
         return reached == num_goals
-
+        """
+        for g, v in goal.items():
+            if g in state:
+                if v == state[g]:
+                    return True
+                else:
+                    return False
     return is_goal
 
 
@@ -98,8 +106,35 @@ def graph(state):
             yield (r.name, r.effect(state), r.cost)
 
 
-def heuristic(state):
+def heuristic(current_state, effect_state):
     # Implement your heuristic here!
+    for keys in effect_state:
+        if not keys in current_state:#something new is worth exploring
+            return -1
+    if effect_state['bench'] > 1:#only need 1
+        return 10000
+    elif effect_state['wooden_axe'] > 1:#only need 1
+        return 10000
+    elif effect_state['furnace'] > 1:#only need 1
+        return 10000
+    elif effect_state['wooden_pickaxe'] > 1:#only need 1
+        return 10000
+    elif effect_state['stone_pickaxe'] > 1:#only need 1
+        return 10000
+    elif effect_state['stone_axe'] > 1:#only need 1
+        return 10000
+    elif effect_state['plank'] > 8:#having more than a certain number is redundant
+        return 100
+    elif effect_state['wood'] > 4:#having more than a certain number is redundant
+        return 100
+    elif effect_state['stick'] > 4:#having more than a certain number is redundant
+        return 100
+    elif effect_state['cobble'] > 8:#having more than a certain number is redundant
+        return 100
+    elif effect_state['coal'] > 8:#having more than a certain number is redundant
+        return 100
+    elif effect_state['ore'] > 8:#having more than a certain number is redundant
+        return 100
     return 0
 
 
@@ -122,14 +157,16 @@ def search(graph, state, is_goal, limit, heuristic):
     while True:
         current = heappop(h)[1]
         if is_goal(current):
+            print(f"\nstate is {current}---------------------")
             break
-        print(f"state is {current}---------------------")
         for possible_action, effect_state, cost in graph(current):
-            print(f"from state {current} we can do action {possible_action} with effect {effect_state} with cost {cost}")
+            #print(f"\nfrom state {current} we can do action {possible_action} with effect {effect_state} with cost {cost}")
             new_cost = cost_so_far[current] + cost
             if effect_state not in cost_so_far or new_cost < cost_so_far[effect_state]:
+                #print(f"\nState is going to be {effect_state} from action {possible_action}")
+                #heuristic(current ,effect_state)
                 cost_so_far[effect_state] = new_cost
-                priority = new_cost
+                priority = new_cost + heuristic(current ,effect_state)
                 heappush(h, (priority, effect_state))
                 came_from[effect_state] = current
 
