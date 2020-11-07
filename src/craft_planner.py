@@ -143,6 +143,9 @@ def heuristic(current_state, effect_state, action):
             strongest_tool = 'wooden_pickaxe'
         if strongest_tool not in action:
             return 1000
+    if "stone_axe at bench" in action:
+        if current_state["stone_axe"] < 1:
+            return -100
     if effect_state['bench'] > 1:  # only need 1
         return 10000
     elif effect_state['wooden_axe'] > 1:  # only need 1
@@ -219,6 +222,7 @@ def search(graph, state, is_goal, limit, heuristic):
         print(time() - start_time, 'seconds.')
         print("Failed to find a path from", state, 'within time limit.')
         return None
+    return None
 
 
 
