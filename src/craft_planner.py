@@ -107,11 +107,42 @@ def graph(state):
             yield (r.name, r.effect(state), r.cost)
 
 
-def heuristic(current_state, effect_state):
+def heuristic(current_state, effect_state, action):
     # Implement your heuristic here!
     for keys in effect_state:
         if not keys in current_state:  # something new is worth exploring
             return -1
+    # Only mine with strongest tools
+    if "axe for coal" in action:
+        strongest_tool = ""
+        if current_state['iron_pickaxe'] > 0:
+            strongest_tool = 'iron_pickaxe'
+        elif current_state['stone_pickaxe'] > 0:
+            strongest_tool = 'stone_pickaxe'
+        elif current_state['wooden_pickaxe'] > 0:
+            strongest_tool = 'wooden_pickaxe'
+        if strongest_tool not in action:
+            return 1000
+    if "axe for cobble" in action:
+        strongest_tool = ""
+        if current_state['iron_pickaxe'] > 0:
+            strongest_tool = 'iron_pickaxe'
+        elif current_state['stone_pickaxe'] > 0:
+            strongest_tool = 'stone_pickaxe'
+        elif current_state['wooden_pickaxe'] > 0:
+            strongest_tool = 'wooden_pickaxe'
+        if strongest_tool not in action:
+            return 1000
+    if "axe for ore" in action:
+        strongest_tool = ""
+        if current_state['iron_pickaxe'] > 0:
+            strongest_tool = 'iron_pickaxe'
+        elif current_state['stone_pickaxe'] > 0:
+            strongest_tool = 'stone_pickaxe'
+        elif current_state['wooden_pickaxe'] > 0:
+            strongest_tool = 'wooden_pickaxe'
+        if strongest_tool not in action:
+            return 1000
     if effect_state['bench'] > 1:  # only need 1
         return 10000
     elif effect_state['wooden_axe'] > 1:  # only need 1
@@ -179,7 +210,7 @@ def search(graph, state, is_goal, limit, heuristic):
                 # print(f"\nState is going to be {effect_state} from action {possible_action}")
                 # heuristic(current ,effect_state)
                 cost_so_far[effect_state] = new_cost
-                priority = new_cost + heuristic(current, effect_state)
+                priority = new_cost + heuristic(current, effect_state, possible_action)
                 heappush(h, (priority, effect_state))
                 came_from[effect_state] = current
 
