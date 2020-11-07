@@ -2,6 +2,7 @@ import json
 from collections import namedtuple, defaultdict, OrderedDict
 from timeit import default_timer as time
 from heapq import heappush, heappop
+from math import inf
 
 Recipe = namedtuple('Recipe', ['name', 'check', 'effect', 'cost'])
 
@@ -79,21 +80,18 @@ def make_goal_checker(goal):
     # met the goal criteria. This code runs once, before the search is attempted.
     def is_goal(state):
         # This code is used in the search process and may be called millions of times.
-
-        # print(f"Goal: {goal}")
         num_goals = len(goal)
         reached = 0
         for g in goal:
-            if state[g] == goal[g]:
+            if state[g] >= goal[g]:
                 reached += 1
         return reached == num_goals
 
         # for g, v in goal.items():
         #     if g in state:
         #         if v == state[g]:
-        #             return True
-        #         else:
-        #             return False
+        #             reached += 1
+        # return reached == num_goals
 
     return is_goal
 
@@ -109,9 +107,9 @@ def graph(state):
 
 def heuristic(current_state, effect_state, action):
     # Implement your heuristic here!
-    for keys in effect_state:
-        if not keys in current_state:  # something new is worth exploring
-            return -1
+    # for keys in effect_state:
+    #     if not keys in current_state:  # something new is worth exploring
+    #         return -1
     # Only mine with strongest tools
     if "axe for coal" in action:
         strongest_tool = ""
@@ -122,7 +120,7 @@ def heuristic(current_state, effect_state, action):
         elif current_state['wooden_pickaxe'] > 0:
             strongest_tool = 'wooden_pickaxe'
         if strongest_tool not in action:
-            return 1000
+            return inf
     if "axe for cobble" in action:
         strongest_tool = ""
         if current_state['iron_pickaxe'] > 0:
@@ -132,7 +130,7 @@ def heuristic(current_state, effect_state, action):
         elif current_state['wooden_pickaxe'] > 0:
             strongest_tool = 'wooden_pickaxe'
         if strongest_tool not in action:
-            return 1000
+            return inf
     if "axe for ore" in action:
         strongest_tool = ""
         if current_state['iron_pickaxe'] > 0:
@@ -142,43 +140,45 @@ def heuristic(current_state, effect_state, action):
         elif current_state['wooden_pickaxe'] > 0:
             strongest_tool = 'wooden_pickaxe'
         if strongest_tool not in action:
-            return 1000
+            return inf
     if "stone_axe at bench" in action:
         if current_state["stone_axe"] < 1:
             return -100
     if effect_state['bench'] > 1:  # only need 1
-        return 10000
+        return inf
     elif effect_state['wooden_axe'] > 1:  # only need 1
-        return 10000
+        return inf
     elif effect_state['furnace'] > 1:  # only need 1
-        return 10000
+        return inf
     elif effect_state['wooden_pickaxe'] > 1:  # only need 1
-        return 10000
+        return inf
     elif effect_state['stone_pickaxe'] > 1:  # only need 1
-        return 10000
+        return inf
     elif effect_state['stone_axe'] > 1:  # only need 1
-        return 10000
+        return inf
     elif effect_state['iron_pickaxe'] > 1:  # only need 1
-        return 10000
-    elif effect_state['iron_axe'] > 1:  # only need 1
-        return 10000
-    elif effect_state['plank'] > 8:  # having more than a certain number is redundant
+        return inf
+    elif effect_state['iron_axe'] > 0:  # only need 1
+        return inf
+    elif effect_state['plank'] > 6:  # having more than a certain number is redundant
         return 100
-    elif effect_state['wood'] > 4:  # having more than a certain number is redundant
+    elif effect_state['wood'] > 3:  # having more than a certain number is redundant
         return 100
-    elif effect_state['stick'] > 4:  # having more than a certain number is redundant
+    elif effect_state['stick'] > 3:  # having more than a certain number is redundant
         return 100
-    elif effect_state['cobble'] > 8:  # having more than a certain number is redundant
+    elif effect_state['cobble'] > 6:  # having more than a certain number is redundant
         return 100
-    elif effect_state['coal'] > 8:  # having more than a certain number is redundant
+    elif effect_state['coal'] > 4:  # having more than a certain number is redundant
         return 100
-    elif effect_state['ore'] > 8:  # having more than a certain number is redundant
+    elif effect_state['ore'] > 4:  # having more than a certain number is redundant
+        return 100
+    elif effect_state['ingot'] > 6:  # having more than a certain number is redundant
         return 100
     # prioritize getting a tool upgrade
     elif current_state['iron_pickaxe'] == 0 and effect_state['iron_pickaxe'] == 1:
-        return -10
+        return -100
     elif current_state['stone_pickaxe'] == 0 and effect_state['stone_pickaxe'] == 1:
-        return -10
+        return -1000
     return 0
 
 
@@ -198,8 +198,13 @@ def search(graph, state, is_goal, limit, heuristic):
     cost_so_far[state] = 0.0
     failed = True
 
-    while True:
-    # while time() - start_time < limit:
+    iterations = 0
+    max_heap = 0
+
+    # while True:
+    while time() - start_time < limit:
+        iterations = iterations + 1
+
         current = heappop(h)[1]
         if is_goal(current):
             print(f"\nstate is {current}---------------------")
@@ -214,8 +219,13 @@ def search(graph, state, is_goal, limit, heuristic):
                 # heuristic(current ,effect_state)
                 cost_so_far[effect_state] = new_cost
                 priority = new_cost + heuristic(current, effect_state, possible_action)
-                heappush(h, (priority, effect_state))
+                if priority < 10000:
+                    heappush(h, (priority, effect_state))
+                hl = len(h)
+                max_heap = max(hl, max_heap)
                 came_from[effect_state] = current
+
+    print(f'Iterations: {iterations}, max_heap: {max_heap}')
 
     # Failed to find a path
     if failed:
