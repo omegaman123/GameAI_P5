@@ -94,6 +94,7 @@ def make_goal_checker(goal):
                     return True
                 else:
                     return False
+
     return is_goal
 
 
@@ -109,32 +110,41 @@ def graph(state):
 def heuristic(current_state, effect_state):
     # Implement your heuristic here!
     for keys in effect_state:
-        if not keys in current_state:#something new is worth exploring
+        if not keys in current_state:  # something new is worth exploring
             return -1
-    if effect_state['bench'] > 1:#only need 1
+    if effect_state['bench'] > 1:  # only need 1
         return 10000
-    elif effect_state['wooden_axe'] > 1:#only need 1
+    elif effect_state['wooden_axe'] > 1:  # only need 1
         return 10000
-    elif effect_state['furnace'] > 1:#only need 1
+    elif effect_state['furnace'] > 1:  # only need 1
         return 10000
-    elif effect_state['wooden_pickaxe'] > 1:#only need 1
+    elif effect_state['wooden_pickaxe'] > 1:  # only need 1
         return 10000
-    elif effect_state['stone_pickaxe'] > 1:#only need 1
+    elif effect_state['stone_pickaxe'] > 1:  # only need 1
         return 10000
-    elif effect_state['stone_axe'] > 1:#only need 1
+    elif effect_state['stone_axe'] > 1:  # only need 1
         return 10000
-    elif effect_state['plank'] > 8:#having more than a certain number is redundant
+    elif effect_state['iron_pickaxe'] > 1:  # only need 1
+        return 10000
+    elif effect_state['iron_axe'] > 1:  # only need 1
+        return 10000
+    elif effect_state['plank'] > 8:  # having more than a certain number is redundant
         return 100
-    elif effect_state['wood'] > 4:#having more than a certain number is redundant
+    elif effect_state['wood'] > 4:  # having more than a certain number is redundant
         return 100
-    elif effect_state['stick'] > 4:#having more than a certain number is redundant
+    elif effect_state['stick'] > 4:  # having more than a certain number is redundant
         return 100
-    elif effect_state['cobble'] > 8:#having more than a certain number is redundant
+    elif effect_state['cobble'] > 8:  # having more than a certain number is redundant
         return 100
-    elif effect_state['coal'] > 8:#having more than a certain number is redundant
+    elif effect_state['coal'] > 8:  # having more than a certain number is redundant
         return 100
-    elif effect_state['ore'] > 8:#having more than a certain number is redundant
+    elif effect_state['ore'] > 8:  # having more than a certain number is redundant
         return 100
+    # prioritize getting a tool upgrade
+    elif current_state['iron_pickaxe'] == 0 and effect_state['iron_pickaxe'] == 1:
+        return -10
+    elif current_state['stone_pickaxe'] == 0 and effect_state['stone_pickaxe'] == 1:
+        return -10
     return 0
 
 
@@ -146,34 +156,39 @@ def search(graph, state, is_goal, limit, heuristic):
     # representing the path. Each element (tuple) of the list represents a state
     # in the path and the action that took you to this state
 
-    # while time() - start_time < limit:
     h = []
     heappush(h, (0, state))
     came_from = dict()
     cost_so_far = dict()
     came_from[state] = None
     cost_so_far[state] = 0.0
+    failed = True
 
-    while True:
+    # while True:
+    while time() - start_time < limit:
         current = heappop(h)[1]
         if is_goal(current):
             print(f"\nstate is {current}---------------------")
+            print(time() - start_time, 'seconds.')
+            failed = False
             break
         for possible_action, effect_state, cost in graph(current):
-            #print(f"\nfrom state {current} we can do action {possible_action} with effect {effect_state} with cost {cost}")
+            # print(f"\nfrom state {current} we can do action {possible_action} with effect {effect_state} with cost {cost}")
             new_cost = cost_so_far[current] + cost
             if effect_state not in cost_so_far or new_cost < cost_so_far[effect_state]:
-                #print(f"\nState is going to be {effect_state} from action {possible_action}")
-                #heuristic(current ,effect_state)
+                # print(f"\nState is going to be {effect_state} from action {possible_action}")
+                # heuristic(current ,effect_state)
                 cost_so_far[effect_state] = new_cost
-                priority = new_cost + heuristic(current ,effect_state)
+                priority = new_cost + heuristic(current, effect_state)
                 heappush(h, (priority, effect_state))
                 came_from[effect_state] = current
 
     # Failed to find a path
-    print(time() - start_time, 'seconds.')
-    print("Failed to find a path from", state, 'within time limit.')
-    return None
+    if failed:
+        print(time() - start_time, 'seconds.')
+        print("Failed to find a path from", state, 'within time limit.')
+        return None
+
 
 
 if __name__ == '__main__':
@@ -208,7 +223,7 @@ if __name__ == '__main__':
     state.update(Crafting['Initial'])
 
     # Search for a solution
-    resulting_plan = search(graph, state, is_goal, 5, heuristic)
+    resulting_plan = search(graph, state, is_goal, 30, heuristic)
 
     if resulting_plan:
         # Print resulting plan
