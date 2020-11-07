@@ -144,6 +144,9 @@ def heuristic(current_state, effect_state, action):
     if "stone_axe at bench" in action:
         if current_state["stone_axe"] < 1:
             return -100
+    if "craft rail" in action:
+        if current_state['cart'] > 0:
+            return -100
     if effect_state['bench'] > 1:  # only need 1
         return inf
     elif effect_state['wooden_axe'] > 1:  # only need 1
@@ -156,17 +159,33 @@ def heuristic(current_state, effect_state, action):
         return inf
     elif effect_state['stone_axe'] > 1:  # only need 1
         return inf
-    elif effect_state['iron_pickaxe'] > 1:  # only need 1
+    elif effect_state['iron_pickaxe'] > 0:  # only need 1
         return inf
     elif effect_state['iron_axe'] > 0:  # only need 1
         return inf
-    elif effect_state['plank'] > 6:  # having more than a certain number is redundant
-        return 100
+
+    elif effect_state['plank'] > 8:  # having more than a certain number is redundant
+        return 10000
     elif effect_state['wood'] > 3:  # having more than a certain number is redundant
+        return 10000
+    elif effect_state['stick'] > 5:  # having more than a certain number is redundant
+        return 10000
+    elif effect_state['cobble'] > 8:  # having more than a certain number is redundant
+        return 10000
+    elif effect_state['coal'] > 17:  # having more than a certain number is redundant
+        return 10000
+    elif effect_state['ore'] > 17:  # having more than a certain number is redundant
+        return 10000
+    elif effect_state['ingot'] > 17:  # having more than a certain number is redundant
+        return 10000
+
+    elif effect_state['plank'] > 4:  # having more than a certain number is redundant
         return 100
-    elif effect_state['stick'] > 3:  # having more than a certain number is redundant
+    elif effect_state['wood'] > 2:  # having more than a certain number is redundant
         return 100
-    elif effect_state['cobble'] > 6:  # having more than a certain number is redundant
+    elif effect_state['stick'] > 2:  # having more than a certain number is redundant
+        return 100
+    elif effect_state['cobble'] > 4:  # having more than a certain number is redundant
         return 100
     elif effect_state['coal'] > 4:  # having more than a certain number is redundant
         return 100
@@ -174,11 +193,11 @@ def heuristic(current_state, effect_state, action):
         return 100
     elif effect_state['ingot'] > 6:  # having more than a certain number is redundant
         return 100
-    # prioritize getting a tool upgrade
+        # prioritize getting a tool upgrade
     elif current_state['iron_pickaxe'] == 0 and effect_state['iron_pickaxe'] == 1:
-        return -100
+        return -10
     elif current_state['stone_pickaxe'] == 0 and effect_state['stone_pickaxe'] == 1:
-        return -1000
+        return -10
     return 0
 
 
@@ -194,9 +213,11 @@ def search(graph, state, is_goal, limit, heuristic):
     heappush(h, (0, state))
     came_from = dict()
     cost_so_far = dict()
-    came_from[state] = None
+    came_from[state] = (None, "start")
     cost_so_far[state] = 0.0
     failed = True
+    start_state = state.copy()
+    path = []
 
     iterations = 0
     max_heap = 0
@@ -223,8 +244,11 @@ def search(graph, state, is_goal, limit, heuristic):
                     heappush(h, (priority, effect_state))
                 hl = len(h)
                 max_heap = max(hl, max_heap)
-                came_from[effect_state] = current
-
+                came_from[effect_state] = (current, possible_action)
+    # while state is not start_state:
+    #     path.append(came_from[state][1])
+    #     state = came_from[state]
+    print(f'path is {path}')
     print(f'Iterations: {iterations}, max_heap: {max_heap}')
 
     # Failed to find a path
@@ -232,8 +256,7 @@ def search(graph, state, is_goal, limit, heuristic):
         print(time() - start_time, 'seconds.')
         print("Failed to find a path from", state, 'within time limit.')
         return None
-    return None
-
+    return path
 
 
 if __name__ == '__main__':
