@@ -79,21 +79,21 @@ def make_goal_checker(goal):
     # met the goal criteria. This code runs once, before the search is attempted.
     def is_goal(state):
         # This code is used in the search process and may be called millions of times.
-        """
-        print(f"Goal: {goal}")
+
+        # print(f"Goal: {goal}")
         num_goals = len(goal)
         reached = 0
         for g in goal:
-            if state[g] > 1:
+            if state[g] == goal[g]:
                 reached += 1
         return reached == num_goals
-        """
-        for g, v in goal.items():
-            if g in state:
-                if v == state[g]:
-                    return True
-                else:
-                    return False
+
+        # for g, v in goal.items():
+        #     if g in state:
+        #         if v == state[g]:
+        #             return True
+        #         else:
+        #             return False
 
     return is_goal
 
@@ -198,8 +198,8 @@ def search(graph, state, is_goal, limit, heuristic):
     cost_so_far[state] = 0.0
     failed = True
 
-    # while True:
-    while time() - start_time < limit:
+    while True:
+    # while time() - start_time < limit:
         current = heappop(h)[1]
         if is_goal(current):
             print(f"\nstate is {current}---------------------")
