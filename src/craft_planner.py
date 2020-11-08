@@ -224,10 +224,9 @@ def search(graph, state, is_goal, limit, heuristic):
     cost_so_far = dict()
     came_from[state] = (None, "start")
     cost_so_far[state] = 0.0
+    end_state = None
     failed = True
-    start_state = state.copy()
     path = []
-
     iterations = 0
     max_heap = 0
 
@@ -239,6 +238,7 @@ def search(graph, state, is_goal, limit, heuristic):
         if is_goal(current):
             print(f"\nstate is {current}---------------------")
             print(time() - start_time, 'seconds.')
+            end_state = current
             failed = False
             break
         for possible_action, effect_state, cost in graph(current):
@@ -253,12 +253,17 @@ def search(graph, state, is_goal, limit, heuristic):
                     heappush(h, (priority, effect_state))
                 hl = len(h)
                 max_heap = max(hl, max_heap)
-                came_from[effect_state] = (current, possible_action)
-    # while state is not start_state:
-    #     path.append(came_from[state][1])
-    #     state = came_from[state]
-    print(f'path is {path}')
-    print(f'Iterations: {iterations}, max_heap: {max_heap}')
+                came_from[effect_state] = (current, possible_action, cost)
+
+    ptr = came_from[end_state]
+    cost = 0
+    while ptr[1] is not "start":
+        path.insert(0, (ptr[0], ptr[1]))
+        cost += ptr[2]
+        ptr = came_from[ptr[0]]
+
+    print(f'total cost is {cost}')
+    print(f'Iterations: {iterations}, max_heap: {max_heap}\n')
 
     # Failed to find a path
     if failed:
