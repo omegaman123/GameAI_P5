@@ -144,9 +144,18 @@ def heuristic(current_state, effect_state, action):
     if "stone_axe at bench" in action:
         if current_state["stone_axe"] < 1:
             return -100
+    if "craft cart" in action:
+        if effect_state['cart'] > 1:
+            return inf
+        else:
+            return -1000
     if "craft rail" in action:
         if current_state['cart'] > 0:
-            return -100
+            print("rail2")
+            return -1000
+        else:
+            print("rail")
+            return -1000
     if effect_state['bench'] > 1:  # only need 1
         return inf
     elif effect_state['wooden_axe'] > 1:  # only need 1
@@ -180,19 +189,19 @@ def heuristic(current_state, effect_state, action):
         return 10000
 
     elif effect_state['plank'] > 4:  # having more than a certain number is redundant
-        return 100
+        return 1000
     elif effect_state['wood'] > 2:  # having more than a certain number is redundant
-        return 100
+        return 1000
     elif effect_state['stick'] > 2:  # having more than a certain number is redundant
-        return 100
+        return 1000
     elif effect_state['cobble'] > 4:  # having more than a certain number is redundant
-        return 100
+        return 1000
     elif effect_state['coal'] > 4:  # having more than a certain number is redundant
-        return 100
+        return 1000
     elif effect_state['ore'] > 4:  # having more than a certain number is redundant
-        return 100
+        return 1000
     elif effect_state['ingot'] > 6:  # having more than a certain number is redundant
-        return 100
+        return 1000
         # prioritize getting a tool upgrade
     elif current_state['iron_pickaxe'] == 0 and effect_state['iron_pickaxe'] == 1:
         return -10
