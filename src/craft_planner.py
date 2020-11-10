@@ -202,7 +202,7 @@ def heuristic(current_state, effect_state, action):
         return 500
         # prioritize getting a tool upgrade
     elif current_state['iron_pickaxe'] == 0 and effect_state['iron_pickaxe'] == 1:
-        return -10
+        return -100
     elif current_state['stone_pickaxe'] == 0 and effect_state['stone_pickaxe'] == 1:
         return -10
     return 0
