@@ -253,6 +253,12 @@ def search(graph, state, is_goal, limit, heuristic):
                 max_heap = max(hl, max_heap)
                 came_from[effect_state] = (current, possible_action, cost)
 
+        # Failed to find a path
+    if failed:
+        print(time() - start_time, 'seconds.')
+        print("Failed to find a path from", state, 'within time limit.')
+        return None
+
     ptr = came_from[end_state]
     cost = 0
     while ptr[1] is not "start":
@@ -260,14 +266,10 @@ def search(graph, state, is_goal, limit, heuristic):
         cost += ptr[2]
         ptr = came_from[ptr[0]]
 
-    print(f'total cost is {cost}')
+    print(f'total cost is {cost} length is {len(path)}')
     print(f'Iterations: {iterations}, max_heap: {max_heap}\n')
 
-    # Failed to find a path
-    if failed:
-        print(time() - start_time, 'seconds.')
-        print("Failed to find a path from", state, 'within time limit.')
-        return None
+
     return path
 
 
