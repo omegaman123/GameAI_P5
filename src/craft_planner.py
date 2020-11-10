@@ -151,10 +151,8 @@ def heuristic(current_state, effect_state, action):
             return -1000
     if "craft rail" in action:
         if current_state['cart'] > 0:
-            print("rail2")
             return -1000
         else:
-            print("rail")
             return -1000
     if effect_state['bench'] > 1:  # only need 1
         return inf
@@ -168,40 +166,40 @@ def heuristic(current_state, effect_state, action):
         return inf
     elif effect_state['stone_axe'] > 1:  # only need 1
         return inf
-    elif effect_state['iron_pickaxe'] > 0:  # only need 1
+    elif effect_state['iron_pickaxe'] > 1:  # only need 1
         return inf
-    elif effect_state['iron_axe'] > 0:  # only need 1
+    elif effect_state['iron_axe'] > 1:  # only need 1
         return inf
 
     elif effect_state['plank'] > 8:  # having more than a certain number is redundant
-        return 10000
+        return 1000
     elif effect_state['wood'] > 3:  # having more than a certain number is redundant
-        return 10000
+        return 1000
     elif effect_state['stick'] > 5:  # having more than a certain number is redundant
-        return 10000
+        return 1000
     elif effect_state['cobble'] > 8:  # having more than a certain number is redundant
-        return 10000
+        return 1000
     elif effect_state['coal'] > 17:  # having more than a certain number is redundant
-        return 10000
+        return 1000
     elif effect_state['ore'] > 17:  # having more than a certain number is redundant
-        return 10000
+        return 1000
     elif effect_state['ingot'] > 17:  # having more than a certain number is redundant
-        return 10000
+        return 1000
 
     elif effect_state['plank'] > 4:  # having more than a certain number is redundant
-        return 1000
+        return 500
     elif effect_state['wood'] > 2:  # having more than a certain number is redundant
-        return 1000
+        return 500
     elif effect_state['stick'] > 2:  # having more than a certain number is redundant
-        return 1000
-    elif effect_state['cobble'] > 4:  # having more than a certain number is redundant
-        return 1000
-    elif effect_state['coal'] > 4:  # having more than a certain number is redundant
-        return 1000
-    elif effect_state['ore'] > 4:  # having more than a certain number is redundant
-        return 1000
-    elif effect_state['ingot'] > 6:  # having more than a certain number is redundant
-        return 1000
+        return 500
+    elif effect_state['cobble'] > 5:  # having more than a certain number is redundant
+        return 500
+    elif effect_state['coal'] > 5:  # having more than a certain number is redundant
+        return 500
+    elif effect_state['ore'] > 5:  # having more than a certain number is redundant
+        return 500
+    elif effect_state['ingot'] > 7:  # having more than a certain number is redundant
+        return 500
         # prioritize getting a tool upgrade
     elif current_state['iron_pickaxe'] == 0 and effect_state['iron_pickaxe'] == 1:
         return -10
